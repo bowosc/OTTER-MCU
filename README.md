@@ -1,6 +1,6 @@
 # The OTTER MCU
 ### Description
-The OTTER is a full, assembly-programmable <a href="https://en.wikipedia.org/wiki/RISC-V">RISC-V</a> <a href="https://en.wikipedia.org/wiki/Microcontroller">Microcontroller</a>. I designed the OTTER in SystemVerilog, testing it on a <a href="[https://github.com/TheThirdOne/rars](https://www.trenz-electronic.de/en/Basys-3-Artix-7-FPGA-Board-academic/26083)">BASYS-3 FPGA board</a>.
+The OTTER is a full, assembly-programmable <a href="https://en.wikipedia.org/wiki/RISC-V">RISC-V</a> <a href="https://en.wikipedia.org/wiki/Microcontroller">Microcontroller</a>. I designed the OTTER in SystemVerilog, testing it on a <a href="https://www.trenz-electronic.de/en/Basys-3-Artix-7-FPGA-Board-academic/26083">BASYS-3 FPGA board</a>.
 
 ### Programming the OTTER
 The OTTER is fully programmable with RISC-V assembly, compiled to machine code. 
