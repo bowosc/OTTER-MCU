@@ -1,6 +1,6 @@
 # The OTTER MCU
 ### Description
-The OTTER is a full, assembly-programmable <a href="https://en.wikipedia.org/wiki/RISC-V">RISC-V</a> <a href="https://en.wikipedia.org/wiki/Microcontroller">Microcontroller</a>. I designed the OTTER in SystemVerilog, testing it on a <a href="https://www.trenz-electronic.de/en/Basys-3-Artix-7-FPGA-Board-academic/26083">BASYS-3 FPGA board</a>.
+The OTTER is a full, assembly-programmable <a href="https://en.wikipedia.org/wiki/RISC-V">RISC-V</a> <a href="https://en.wikipedia.org/wiki/Microcontroller">Microcontroller</a>. I designed the OTTER in SystemVerilog, testing it on a <a href="https://www.trenz-electronic.de/en/Basys-3-Artix-7-FPGA-Board-academic/26083">Basys-3 FPGA board</a>.
 
 ### Programming the OTTER
 The OTTER is fully programmable with RISC-V assembly, compiled to machine code. 
@@ -13,7 +13,7 @@ The OTTER closely follows traditional RISC-V Microcontroller architecture: <br>
 <img height="500px" alt="OTTER Architecture" src="https://github.com/user-attachments/assets/1a5d48d8-6b31-4121-a7e5-d83bf0763285" />
 
 ### Testing the OTTER
-I used Xilinx Vivado to write and test the OTTER, preforming unit and end-to-end tests initially using the simulation timing diagram and later testing on a physical BASYS-3 board with the otter_wrapper (written by Prof. Hummel). The test diagrams I wrote and used are in a series of google docs at the moment, I'll upload those here when I get a chance.
+I used Xilinx Vivado to write and test the OTTER, preforming unit and end-to-end tests initially using the simulation timing diagram and later testing on a physical Basys-3 board with the otter_wrapper (written by Prof. Hummel). The test diagrams I wrote and used are in a series of google docs at the moment, I'll upload those here when I get a chance.
 
 A demonstration of the OTTER running a full test script: </br>
 [![OTTER runs test script](http://img.youtube.com/vi/a2BAeu-PlXg/0.jpg)](http://www.youtube.com/watch?v=a2BAeu-PlXg) <br>
