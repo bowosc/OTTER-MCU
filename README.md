@@ -20,7 +20,7 @@ A demonstration of the OTTER running a full test script: </br>
 (http://www.youtube.com/watch?v=a2BAeu-PlXg)
 
 ### Architecture
-I built the OTTER for a computer architecture course I took (CPE 233), submitting it with a small group for one of our final projects (we each built our own MCUs, demonstrating programmability on one of them). 
+I built the OTTER for a computer architecture course I took (CPE 233), submitting it with a small group for one of our final projects (we each built our own MCUs, demonstrating programmability on one of them). Each member of the group built their own OTTER, and we submitted one. This is mine.
 The OTTER's original architecture was designed by Prof. Joseph Callenes-Sloan and the assembler manual was written by Prof. James Mealy and Prof. Paul Hummel. 
 
 All code in the OTTER is my own, with the exception of the otter_memory module written by Prof. Paul Hummel. 
