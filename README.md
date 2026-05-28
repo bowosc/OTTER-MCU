@@ -1,4 +1,6 @@
 # The OTTER MCU
+*Note: This is an older version of the OTTER. My most recent version uses a 5-stage pipeline and 3-level memory caching, and is ~4x faster. I'll upload that version in a bit, once I get around to formatting it.*
+
 ### Description
 The OTTER is a full, assembly-programmable <a href="https://en.wikipedia.org/wiki/RISC-V">RISC-V</a> <a href="https://en.wikipedia.org/wiki/Microcontroller">Microcontroller</a>. I designed the OTTER in SystemVerilog, testing it on a <a href="https://www.trenz-electronic.de/en/Basys-3-Artix-7-FPGA-Board-academic/26083">Basys-3 FPGA board</a>.
 
