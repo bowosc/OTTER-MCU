@@ -1,139 +1,122 @@
 `timescale 1ns / 1ps
 
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: Bowman Edebohls
-// 
-// Create Date: 
-// Design Name: 
-// Module Name: 
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
-
 module CU_FSM(
-    input FSM_RST,
-    input [6:0] FSM_opcode, //opcode
-    input clk,
-    output logic FSM_PCWrite, //enables PC to update
-    output logic FSM_regWrite, //enables reg_file to write
-    output logic FSM_memWE2, //memory write enable
-    output logic FSM_memRDEN1, //memory read enable for instruction fetch
-    output logic FSM_memRDEN2, //memory read enable for data
-    output logic FSM_reset //internal reset signal
+    input logic CLK,
+    input logic RST,
+    input logic [6:0] IR_OPCODE,
+    output logic PC_WRITE,
+    output logic REG_WRITE,
+    output logic MEM_WE2,
+    output logic MEM_RDEN1,
+    output logic MEM_RDEN2,
+    output logic rst
     );
-
-//define 3 FSM states
-typedef enum {ST_init, ST_fetch, ST_execute, ST_wb} STATES;
-
-STATES NS, PS;
-
-always_ff @(posedge clk) begin
-    if (FSM_RST) //if FSM_RST is high, reset to ST_init
-        PS <= ST_init; 
-    else
-        PS <= NS; //update state
+    
+    //Create labels for each state using enumeration, along with state variable
+    typedef enum {INIT, FETCH, EXEC, WRITE_BACK} state;
+    
+    //create state variables
+    state NS, PS;
+    
+    //Create state register
+    always_ff@(posedge CLK) begin
+        if (RST == 1'b1)
+            PS <= INIT;
+        else
+            PS <= NS;
     end
     
-always_comb begin
-//default values for all control signals
-    NS = PS;
-    FSM_PCWrite = 1'b0;
-    FSM_regWrite = 1'b0;
-    FSM_memWE2 = 1'b0;
-    FSM_memRDEN1 = 1'b0;
-    FSM_memRDEN2 = 1'b0;
-    FSM_reset = 1'b0;
-    NS = PS;
+    //Create input logic for each state.
+    always_comb begin
+        //initialize all outputs to zero, always, only 
+        //to be changed within case statement for Present State
+        PC_WRITE = 1'b0;
+        REG_WRITE = 1'b0;
+        MEM_WE2 = 1'b0;
+        MEM_RDEN1 = 1'b0;
+        MEM_RDEN2 = 1'b0;
+        rst = 1'b0;
+        
+        //Present State case statement
+        case(PS)
+            //Initial state, set PC reset to 1 so that first address
+            //is output, and make next state Fetch
+            INIT: begin 
+                NS = FETCH;
+                rst = 1'b1;
+            end
+            
+            //Fetch state, set Memory read enable one to high
+            //so that the instruction is output at the address 
+            //given by the PC
+            FETCH: begin 
+                NS = EXEC;
+                MEM_RDEN1 = 1'b1;
+            end
+            
+            //Execute state: employ case statements to set all read/write outputs
+            EXEC: begin
+                NS = FETCH;
+                case (IR_OPCODE)
+                    7'b0010111: begin // AUIPC
+                        PC_WRITE = 1'b1;
+                        REG_WRITE = 1'b1;
+                    end
+                    7'b1101111: begin // JAL
+                        PC_WRITE = 1'b1;
+                        REG_WRITE = 1'b1;
+                    end
+                    7'b1100111: begin // JALR
+                        PC_WRITE = 1'b1;
+                        REG_WRITE = 1'b1;
+                    end
+                    7'b0100011: begin // Store Instructions
+                        PC_WRITE = 1'b1;
+                        MEM_WE2 = 1'b1;
+                    end
+                    7'b0000011: begin // Load Instructions
+                        //For load instructions, make next state
+                        //Write Back; in order to prevent the wrong
+                        //data from showing up at DOUT2, set PCwrite and
+                        //regWrite low while setting Mem Read enable 2 high
+                        NS = WRITE_BACK;
+                        MEM_RDEN2 = 1'b1;
+                        PC_WRITE = 1'b0;
+                        REG_WRITE = 1'b0;
+                    end
+                    7'b0110111: begin // LUI
+                        PC_WRITE = 1'b1;
+                        REG_WRITE = 1'b1;
+                    end
+                    7'b0010011: begin // I-type
+                        PC_WRITE = 1'b1;
+                        REG_WRITE = 1'b1;
+                    end
+                    7'b0110011: begin // R-type
+                        PC_WRITE = 1'b1;
+                        REG_WRITE = 1'b1;
+                    end
+                    7'b1100011: begin // B-type
+                        PC_WRITE = 1'b1;
+                    end
+                    default: begin end
+                endcase
+            end
+            
+            //Write back state, set next state to Fetch
+            //set pcWrite and RegWrite to high so that the
+            //program advances and writes the correct data to the 
+            //reg file
+            WRITE_BACK: begin
+                NS = FETCH;
+                PC_WRITE = 1'b1;
+                REG_WRITE = 1'b1;
+            end
+            
+            default: begin
+                NS = INIT;
+            end
+        endcase
+    end
     
-    case (PS)
-        ST_init: begin
-            FSM_reset = 1'b1; //acvtivate internal reset
-            NS = ST_fetch; //move to instruction fetch
-        end
-        
-        ST_fetch: begin
-            FSM_memRDEN1 = 1'b1; //read instruction from memeory
-           
-            NS = ST_execute; //next: execute instruction
-        end
-        
-        ST_execute: begin
-            case (FSM_opcode) //LUI opcode execute case
-                7'b0110111: begin
-                    FSM_PCWrite = 1'b1; //update PC
-                    FSM_regWrite = 1'b1; //Write result to register file
-                    NS = ST_fetch; //fetch is next instruction
-                end
-                
-                7'b0010011: begin //I-type opcode
-                    FSM_regWrite = 1'b1;
-                    FSM_PCWrite = 1'b1;
-                    NS = ST_fetch;
-                end
-                
-                7'b0110011: begin //R-type opcode
-                    FSM_regWrite = 1'b1;
-                    FSM_PCWrite = 1'b1;
-                    NS = ST_fetch;
-                end 
-                
-                7'b0010111: begin //AUIPC opcode
-                    FSM_regWrite = 1'b1;
-                    FSM_PCWrite = 1'b1;
-                    NS = ST_fetch;
-                end 
-                
-                7'b0000011: begin //load opcode
-                    FSM_memRDEN2 = 1'b1; //enable data memory read
-                    NS = ST_wb; //go to write-back state
-                end
-                
-                7'b0100011: begin //store opcode
-                    FSM_memWE2 = 1'b1;
-                    FSM_PCWrite = 1'b1;
-                    NS = ST_fetch;
-                end
-                
-                7'b1100011: begin //branch opcode
-                    FSM_PCWrite = 1'b1;
-                    NS = ST_fetch;
-                end
-                
-                7'b1101111: begin //jal opcode
-                    FSM_regWrite = 1'b1;
-                    FSM_PCWrite = 1'b1;
-                    NS = ST_fetch;
-                end
-                
-                7'b1100111: begin //jalr opcode
-                    FSM_regWrite = 1'b1;
-                    FSM_PCWrite = 1'b1;
-                    NS = ST_fetch;
-                end
-                
-                default: begin //default for unrecognized opcodes
-                    FSM_PCWrite = 1'b1; //still step the pc
-                     NS = ST_fetch;
-                end
-            endcase
-        end
-        
-        ST_wb: begin
-            FSM_PCWrite = 1'b1; //after write-back, advance PC
-            FSM_regWrite = 1'b1; //Write loaded data into destination register
-            NS = ST_fetch; //go back to instruction fetch
-        end
-    endcase
-end
 endmodule

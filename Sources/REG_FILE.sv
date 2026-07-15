@@ -1,62 +1,37 @@
 `timescale 1ns / 1ps
 
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: Bowman Edebohls
-// 
-// Create Date: 
-// Design Name: 
-// Module Name: 
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
 module REG_FILE(
-        input REG_FILE_en, // same as load
-        input logic [31:0] REG_FILE_wd, // thing to write to destination register
-        input logic [4:0] REG_FILE_adr1, // 5 bit address of src reg 1
-        input logic [4:0] REG_FILE_adr2, // 5 bit address of src reg 2
-        input logic [4:0] REG_FILE_wa, // 5 bit address of destination register
-        
-        input REG_FILE_CLK,
-        
-        output [31:0] REG_FILE_Rs1, // data of src reg 1
-        output [31:0] REG_FILE_Rs2 // data of src reg 2
+    input logic CLK,
+    input logic EN,
+    input logic [4:0] ADR1,
+    input logic [4:0] ADR2,
+    input logic [4:0] WA,
+    input logic [31:0] WD,
+    output logic [31:0] RS1,
+    output logic [31:0] RS2
     );
     
-    // set up array. 32 registers, 32 bits each
-    logic [31:0] ram [0:31];
+    //Instantiate 32, 32-bit registers
+    logic [31:0] ram[0:31];
     
-    // initialize all registers to 0
-    initial begin 
-        //int i = 0;
-        for (int i = 0; i < 32; i++) begin
-            ram[i] = 0;
+    //Initialize all registers to 0. 
+    initial begin
+    static int i = 0;
+        for (i = 0; i < 32; i++) begin
+        ram[i] = 0;
         end
-        
     end
     
-    // asynch reads
-    assign REG_FILE_Rs1 = ram[REG_FILE_adr1];
-    assign REG_FILE_Rs2 = ram[REG_FILE_adr2];
-    
-    // synch write
-    always_ff @ (posedge REG_FILE_CLK) begin
-        // no writing to reg 0!!
-        if (REG_FILE_en && (REG_FILE_wa != 5'b00000)) begin
-            ram[REG_FILE_wa] = REG_FILE_wd;
+    //Create asynchronous reads for RS1, RS2
+    assign RS1 = ram[ADR1];
+    assign RS2 = ram[ADR2];
+   
+   //Create register flip flop while ensuring that register
+   //0 (x0) is never written to and remains 0.
+    always_ff@(posedge CLK) begin
+        if (EN == 1'b1 && WA != 5'd0) begin
+            ram[WA] <= WD;
         end
-        // ram[0] <= 0; // just in case 
-    end
+    end 
+    
 endmodule
-
-

@@ -1,22 +1,4 @@
 `timescale 1ns / 1ps
-////////////////////////////////////////////////////////////////////////////////
-// Company: Cal Poly
-// Engineer: Paul Hummel
-//
-// Create Date: 06/28/2018 11:50:35 PM
-// Module Name: CathodeDriver
-// Target Devices: Basys3, 4 digit 7 segment display
-// Description: Display hex values on a 4 digit 7 segment display with common
-//              anode and common cathode, both configured as negative logic so
-//              0s in the CATHODE light up the segments for any digit
-//              corresponding with a 0 in the ANODE
-//
-//              CATHODES = {dp,a,b,c,d,e,f,g}
-//              ANODES = {d4, d3, d2, d1}
-//
-// Revision:
-// Revision 0.01 - File Created
-////////////////////////////////////////////////////////////////////////////////
 
 
 module CathodeDriver(

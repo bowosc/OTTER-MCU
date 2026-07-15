@@ -1,19 +1,4 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: Cal Poly
-// Engineer: Paul Hummel
-//
-// Module Name: BCD
-// Target Devices: Used for displaying decimal on a 4 digit 7 segment display
-// Description: Conversts a 16-bit value into 4 digit binary coded decimal
-//              The full 16-bit range intput cannot be converted because the
-//              output is limited to 4 digiets. Anything above 4 digiets gets
-//              truncated so 12345 is output as 2345
-//
-// Revision:
-// Revision 0.01 - File Created
-//////////////////////////////////////////////////////////////////////////////////
-
 
 module BCD(
     input [15:0] HEX,

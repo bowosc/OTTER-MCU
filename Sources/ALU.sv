@@ -1,49 +1,57 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: Bowman Edebohls
-// 
-// Create Date: 
-// Design Name: 
-// Module Name: 
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
+// Company: Cal Poly San Luis Obispo
+// Engineer: Diego Curiel
+// Create Date: 02/07/2023 10:11:42 AM
+// Module Name: ALU
 //////////////////////////////////////////////////////////////////////////////////
 
 module ALU(
-        input logic [31:0] ALU_srcA,
-        input logic [31:0] ALU_srcB,
-        input logic [3:0] ALU_fun,
-        output logic [31:0] ALU_result
+    input logic [31:0] SRC_A,
+    input logic [31:0] SRC_B,
+    input logic [3:0] ALU_FUN,
+    output logic [31:0] RESULT
     );
-        
-    always_comb begin
     
-        case(ALU_fun)
-            4'b0000: ALU_result = $signed(ALU_srcA) + $signed(ALU_srcB); //add
-            4'b1000: ALU_result = $signed(ALU_srcA) - $signed(ALU_srcB); //sub //why isnt this working in that block with ffff_ffff
-            4'b0111: ALU_result = $signed(ALU_srcA) & $signed(ALU_srcB); //and
-            4'b0110: ALU_result = $signed(ALU_srcA) | $signed(ALU_srcB); //or
-            4'b0100: ALU_result = $signed(ALU_srcA) ^ $signed(ALU_srcB); //xor
-            4'b0101: ALU_result = $signed(ALU_srcA) >> $signed(ALU_srcB[4:0]); //srl
-            4'b0001: ALU_result = $signed(ALU_srcA) << $signed(ALU_srcB[4:0]); //sll
-            4'b1101: ALU_result = $signed(ALU_srcA) >>> ALU_srcB[4:0]; //sra (shift amt is unsigned)
-            4'b0010: ALU_result = {31'b0, ($signed(ALU_srcA) < $signed(ALU_srcB))}; //slt
-            4'b0011: ALU_result = {31'b0, (ALU_srcA < ALU_srcB)}; //sltu
-            4'b1001: ALU_result = $signed(ALU_srcA); //lui copy    
-            default: ALU_result = 32'hdeadbeef; // we should never get here
-        endcase
+    //Design the ALU as a MUX to improve processing speed.
+    //The MUX is dependent on the ALU_FUN.
+    //ALU_FUN determines which operation is carried out with the operands A and B.
+    always_comb begin
+    case(ALU_FUN)
+    4'b0000: begin RESULT = SRC_A + SRC_B; end //add; no signed designator needed
+    4'b1000: begin RESULT = SRC_A - SRC_B; end //sub; no signed designator needed
+    //logic
+    4'b0110: begin RESULT = SRC_A | SRC_B; end //or
+    4'b0111: begin RESULT = SRC_A & SRC_B; end //and
+    4'b0100: begin RESULT = SRC_A ^ SRC_B; end //xor
+    //shifting
+    4'b0101: begin RESULT = SRC_A >> SRC_B[4:0]; end //srl
+    4'b0001: begin RESULT = SRC_A << SRC_B[4:0]; end //sll
+    4'b1101: begin RESULT = $signed(SRC_A) >>> SRC_B[4:0]; end //sra
+    //setting
+    4'b0010: begin RESULT = $signed(SRC_A) < $signed(SRC_B); end //slt
+    4'b0011: begin RESULT = SRC_A < SRC_B; end //sltu
+    //copy
+    4'b1001: begin RESULT = SRC_A; end //lui-copy
+    default: begin RESULT = 32'd0; end
+    endcase
     end
     
 endmodule
 
+
+    // wire [6:0] opcode;
+    // wire [31:0] pc, pc_value, next_pc, jalr_pc, branch_pc, jump_pc, int_pc, A, B,
+    //             I_immed, S_immed, U_immed, aluBin, aluAin, aluResult, rfIn, csr_reg, mem_data;
+
+    // wire [31:0] IR;
+    // wire memRead1, memRead2;
+
+    // wire pcWrite, regWrite, memWrite, op1_sel, mem_op, IorD, pcWriteCond, memRead;
+    // wire [1:0] opB_sel, rf_sel, wb_sel, mSize;
+    // logic [1:0] pc_sel;
+    // wire [3:0] alu_fun;
+    // wire opA_sel;
+
+    // logic br_lt, br_eq, br_ltu;
 

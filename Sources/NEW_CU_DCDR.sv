@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module CU_DCDR(
+module NEW_CU_DCDR(
     input logic IR_30,
     input logic [6:0] IR_OPCODE,
     input logic [2:0] IR_FUNCT,
@@ -11,10 +11,29 @@ module CU_DCDR(
     output logic ALU_SRCA,
     output logic [1:0] ALU_SRCB,
     output logic [2:0] PC_SOURCE,
-    output logic [1:0] RF_WR_SEL
+    output logic [1:0] RF_WR_SEL,
+
+    // These are from the CU_FSM
+    output logic PC_WRITE,  
+    output logic REG_WRITE,
+    output logic MEM_WE2,
+    output logic MEM_RDEN1,
+    output logic MEM_RDEN2,
+    output logic rst
     );
     
-    //Create always comb clock for decoder logic
+    localparam logic [6:0] LUI    = 7'b0110111;
+    localparam logic [6:0] AUIPC  = 7'b0010111;
+    localparam logic [6:0] JAL    = 7'b1101111;
+    localparam logic [6:0] JALR   = 7'b1100111;
+    localparam logic [6:0] BRANCH = 7'b1100011;
+    localparam logic [6:0] LOAD   = 7'b0000011;
+    localparam logic [6:0] STORE  = 7'b0100011;
+    localparam logic [6:0] IMMED  = 7'b0010011;
+    localparam logic [6:0] REGST  = 7'b0110011;
+    localparam logic [6:0] SYSTEM = 7'b1110011;
+    
+    // Create always comb clock for decoder logic
     always_comb begin
         //Instantiate all outputs to 0 so as to avoid
         //unwanted leftovers from previous operations
@@ -25,38 +44,83 @@ module CU_DCDR(
         ALU_SRCB = 2'b00;
         PC_SOURCE = 3'b000;
         RF_WR_SEL = 2'b00;
+
+
+        // prev FSM control signals below (initialize to 0's)
+        PC_WRITE = 1'b0;
+        REG_WRITE = 1'b0;
+        MEM_WE2 = 1'b0;
+        MEM_RDEN2 = 1'b0; 
+        rst = 1'b0;
+
+        /* This will definitely need to be handled later for hazard handling (stalling?)*/
+        MEM_RDEN1 = 1'b1;  // Rn, always trying to read the instruction from memory module (IM)
         
+        
+
         //Case statement depending on the opcode for the 
         //instruction, or the last seven bits of each instruction
         case (IR_OPCODE)
-            7'b0010111: begin // AUIPC
+            AUIPC: begin 
                 ALU_SRCA = 1'b1;
                 ALU_SRCB = 2'b11;
                 RF_WR_SEL = 2'b11;
+
+                // prev FSM control signals below 
+                PC_WRITE = 1'b1;
+                REG_WRITE = 1'b1;
             end
-            7'b1101111: begin // JAL
+            JAL: begin 
                 PC_SOURCE = 3'b011;
+                RF_WR_SEL = 2'b00; // test4.4
+
+                // prev FSM control signals below 
+                PC_WRITE = 1'b1;
+                REG_WRITE = 1'b1;
             end
-            7'b1100111: begin // JALR
+            JALR: begin
                 PC_SOURCE = 3'b001;
+                RF_WR_SEL = 2'b00; // test4.4
+
+                // prev FSM control signals below 
+                PC_WRITE = 1'b1;
+                REG_WRITE = 1'b1;
+
             end
-            7'b0100011: begin // Store Instructions
+            STORE: begin 
                 ALU_SRCB = 2'b10;
+
+                // prev FSM control signals below 
+                PC_WRITE = 1'b1;
+                MEM_WE2 = 1'b1;
             end
-            7'b0000011: begin // Load Instructions
+            LOAD: begin 
                 ALU_SRCB = 2'b01;
                 RF_WR_SEL = 2'b10;
+
+                // Special case: We need to add all of the high signals (from exec and wb states from FSM)
+                MEM_RDEN2 = 1'b1;
+                PC_WRITE = 1'b1;
+                REG_WRITE = 1'b1;
             end
-            7'b0110111: begin // LUI
+            LUI: begin 
                 ALU_FUN = 4'b1001;
                 ALU_SRCA = 1'b1;
                 RF_WR_SEL = 2'b11;
+
+                // prev FSM control signals below 
+                PC_WRITE = 1'b1;
+                REG_WRITE = 1'b1;
             end
-            7'b0010011: begin // I-Type
+            IMMED: begin // I-Type
                 //set constants for all I-type instructions
                 ALU_SRCB = 2'b01;
                 RF_WR_SEL = 2'b11;
-                
+
+                // prev FSM control signals below 
+                PC_WRITE = 1'b1;
+                REG_WRITE = 1'b1;
+
                 //Nested case statement
                 //dependent on the function 3 bits
                 case (IR_FUNCT)
@@ -80,14 +144,22 @@ module CU_DCDR(
                     3'b111: begin ALU_FUN = 4'b0111; end
                 endcase
             end
-            7'b0110011: begin // R-Type
+            REGST: begin // R-Type
                 //set constants for all R-types;
                 //ALU_FUN is just the concatenation of
                 //the 30th bit and the function 3 bits
                 RF_WR_SEL = 2'b11;
                 ALU_FUN = {IR_30, IR_FUNCT};
+
+                // prev FSM control signals below 
+                PC_WRITE = 1'b1;
+                REG_WRITE = 1'b1;
             end
-            7'b1100011: begin // B-Type
+            BRANCH: begin 
+
+                // prev FSM control signals below 
+                PC_WRITE = 1'b1;
+
                 //nested case statement dependent on the
                 //function three bits.
                 //Because there are six real branch instructions, there

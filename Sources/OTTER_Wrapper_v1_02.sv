@@ -1,18 +1,5 @@
 `timescale 1ns / 1ps
-/////////////////////////////////////////////////////////////////////////////
-// Company:
-// Engineer: J. Calllenes
-//           P. Hummel
-//
-// Create Date: 01/20/2019 10:36:50 AM
-// Module Name: OTTER_Wrapper
-// Target Devices: OTTER MCU on Basys3
-// Description: OTTER_WRAPPER with Switches, LEDs, and 7-segment display
-//
-// Revision:
-// Revision 0.01 - File Created
-// Revision 0.02 - Updated MMIO Addresses, signal names
-/////////////////////////////////////////////////////////////////////////////
+
 
 module OTTER_Wrapper(
    input CLK,
@@ -45,7 +32,7 @@ module OTTER_Wrapper(
    logic [15:0] r_SSEG;
     
    // Declare OTTER_CPU ////////////////////////////////////////////////////
-   OTTER CPU (.RST(s_reset), .INTR(1'b0), .CLK(clk_50),
+   OTTER_MCU Pipeline_CPU(.RESET(s_reset), .CLK(clk_50), .INTR(0'b0),
                   .IOBUS_OUT(IOBUS_out), .IOBUS_IN(IOBUS_in),
                   .IOBUS_ADDR(IOBUS_addr), .IOBUS_WR(IOBUS_wr));
 

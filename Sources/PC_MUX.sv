@@ -1,46 +1,38 @@
 `timescale 1ns / 1ps
 
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: Bowman Edebohls
-// 
-// Create Date: 
-// Design Name: 
-// Module Name: 
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
 
 module PC_MUX(
-    input logic [31:0] PC_MUX_A, 
-    input logic [31:0] PC_MUX_B,
-    input logic [31:0] PC_MUX_C,
-    input logic [31:0] PC_MUX_D,
-    input logic [1:0] PC_MUX_SEL,
+    input logic [31:0] PC_OUT_PLUS_FOUR,
+    input logic [31:0] JALR,
+    input logic [31:0] BRANCH,
+    input logic [31:0] JAL,
+    input logic [31:0] MTVEC,
+    input logic [31:0] MEPC,
+    input logic [2:0] PC_SOURCE,
+    output logic [31:0] PC_MUX_OUT
+    );
     
-    output logic [31:0] PC_MUX_Q
-);
-    
+    //Case statement depending on PC_SOURCE
     always_comb begin
-        case(PC_MUX_SEL)
-            0: PC_MUX_Q = PC_MUX_A; //00
-            1: PC_MUX_Q = PC_MUX_B; //01
-            2: PC_MUX_Q = PC_MUX_C; //10
-            3: PC_MUX_Q = PC_MUX_D; //11
-            default: PC_MUX_Q = 32'hdeadbeef; // should never get to this point
+        case(PC_SOURCE)
+            3'b000: begin PC_MUX_OUT = PC_OUT_PLUS_FOUR;
+            end
+            3'b001: begin PC_MUX_OUT = JALR;
+            end
+            3'b010: begin PC_MUX_OUT = BRANCH;
+            end
+            3'b011: begin PC_MUX_OUT = JAL;
+            end
+            3'b100: begin PC_MUX_OUT = MTVEC;
+            end
+            3'b101: begin PC_MUX_OUT = MEPC;
+            end
+            3'b110: begin PC_MUX_OUT = 32'h00000006; //Set to 6 to know what the select is, shouldn't happen
+            end                                     //shouldn't happen
+            3'b111: begin PC_MUX_OUT = 32'h00000007; //Set to 7 to know what the select is, shouldn't happen
+            end                                      //shouldn't happen
+            default: begin PC_MUX_OUT = 32'h00000008; //Set to 8 to know what the select is, shouldn't happen
+            end                                       //shouldn't happen
         endcase
     end
 endmodule
-
-
-
